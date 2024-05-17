@@ -1,7 +1,14 @@
 ﻿using System.Text;
 using DesafioProjetoHospedagem.Models;
+using System.IO;
+using System.Globalization;
+using System.Collections.Generic;
 
 Console.OutputEncoding = Encoding.UTF8;
+//Mostra Menu
+Menu app = new Menu();
+app.MostrarMenu();
+
 
 // Cria os modelos de hóspedes e cadastra na lista de hóspedes
 List<Pessoa> hospedes = new List<Pessoa>();
