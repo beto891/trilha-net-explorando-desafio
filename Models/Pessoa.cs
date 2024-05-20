@@ -8,18 +8,20 @@ public class Pessoa
     private string _sobrenome;
     private string _senha;
     private string _usuario;
+    public string Funcao;
 
     public Pessoa(string nome)
     {
         Nome = nome;
     }
 
-    public Pessoa(string nome, string sobrenome, string senha, string usuario)
+    public Pessoa(string nome, string sobrenome, string senha, string usuario, string funcao)
     {
         Nome = nome;
         Sobrenome = sobrenome;
         Senha = senha;
         Usuario = usuario;
+        Funcao = funcao;
     }
 
     public string Nome
@@ -73,6 +75,9 @@ public class Pessoa
             _senha = value;
         }
     }
+
+        public string funcao {get; set;} //'usuario' ou 'admin'
+        
     public string NomeCompleto => $"{Nome} {Sobrenome}".ToUpper();
     
     public void Apresentar()

@@ -15,10 +15,8 @@ namespace DesafioProjetoHospedagem.Models
         public void MostrarMenu()
         {
             Console.WriteLine("============ Bem-vindo ao Sistema de Resevas do Hotel Premium ============");
-            Console.WriteLine("\t 1. Login como Usuário");
-            Console.WriteLine("\t 2. Login como Administrador");
-            Console.WriteLine("\t 3. Registrar Usuário");
-            Console.WriteLine("\t 4. Registrar Administrador");
+            Console.WriteLine("1. Login como Usuário");
+            Console.WriteLine("2. Registrar Usuário");
             Console.WriteLine("\t 5. Sair");
 
             int opcao = LerInteiro("Selecione uma opção: ");
@@ -27,17 +25,11 @@ namespace DesafioProjetoHospedagem.Models
             {
                 case 1:
                     LoginUsuario();
-                        break;
-                case 2:
-                    //LoginAdministrador();
                     break;
-                case 3:
+                case 2:
                     RegistrarUsuario();
                     break;
-                case 4:
-                    //RegistrarAdm();
-                    break;
-                case 5:
+                case 3:
                     Environment.Exit(0);
                     break;        
                 default:
@@ -45,8 +37,14 @@ namespace DesafioProjetoHospedagem.Models
                 MostrarMenu();
                 break;
             }
-
         }
+
+        //Menu Para Usuario
+        public void MostrarMenuUsuario()
+        {
+            Console.WriteLine("============ Bem-vindo ao Sistema de Resevas do Hotel Premium ============");
+        }
+
         //Métodos do menu;
         static int LerInteiro(string prompt)
         {
@@ -88,7 +86,7 @@ namespace DesafioProjetoHospedagem.Models
         public bool AutenticarUsuario(string usuario, string senha)
         {
             // Ler todas as linhas do arquivo de usuários cadastrados
-            string[] linhas = File.ReadAllLines("Lista_Cadastro/arquivoUsuarioESenha.txt");
+            string[] linhas = File.ReadAllLines("Lista_Cadastro/DadosCadastrados.txt");
 
             // Verificar se as credenciais correspondem a algum usuário no arquivo
             foreach (string linha in linhas)
@@ -96,74 +94,118 @@ namespace DesafioProjetoHospedagem.Models
                 string[] partes = linha.Split(';');
                 if (partes[0] == usuario && partes[1] == senha)
                 {
-                    Console.WriteLine($"Bem vindo ao Hotel Premium, {usuario}!");
+                    Console.WriteLine($"Bem vindo ao Hotel, {usuario}!");
                     return true; // Usuário e senha encontrados
                 }
             }
             return false; // Usuário e senha não encontrados
         }
 
+        public bool AutorizarUsuario(string usuario, string funcao)
+        {
+            string[] linha = File.ReadAllLines("Lista_Cadastro/DadosCadastrados.txt");
+
+            foreach(string var in linha )
+            {
+                string[] partes = var.Split(';');
+                if (partes[0] == usuario && partes[1] == funcao)
+                {
+                    return  true; //usuario autorizado com sucesso
+                }
+            }
+            return false; //autorização falhou;
+        }
+
         //Método de login Usuário;
         public void LoginUsuario()
         {
-            Console.WriteLine("\t Digite seu nome de usuário: ");
+            Console.WriteLine("Digite seu nome de usuário: ");
             string usuario = (Console.ReadLine() ?.Trim()) ?? string.Empty;
             
+            Console.WriteLine("Digite sua senha: ");
+            string senha = LerSenha() ?.Trim() ?? string.Empty;
 
-            Console.WriteLine("\t Digite sua senha: ");
-            string senha = LerSenha();
             AutenticarUsuario(usuario, senha);
+            UsuarioRegistrado(usuario, senha);
+            AutorizarUsuario(usuario, funcao: "");
+
+            if (AutenticarUsuario(usuario, senha))
+            {
+                if (AutorizarUsuario(usuario, "Admin"))
+                {
+                    
+                    Console.WriteLine("\nLogin bem-sucedido! Bem-vindo, administrador" + usuario + "!");
+                     // Aqui você pode chamar o método para exibir as opções de administração
+                    
+                }
+                else
+                {
+                    Console.WriteLine($"\nLogin bem-sucedido! Bem-vindo usuario {usuario}!");
+                    
+                }
+            }
 
         }
 
         //Método para Registrar Usuario;
         public void RegistrarUsuario()
         {
-            Console.WriteLine("\tDigite seu nome: ");
-            string UserNome = Console.ReadLine();
+            //cria uma instancia da classe Pessoa
+            Pessoa pessoa = new Pessoa();
 
-            Console.WriteLine("\tDigite seu sobre nome:");
-            string UserSobrenome = Console.ReadLine();
+            //dados adiquiridos através do teclado
+            Console.WriteLine("Digite seu nome: ");
+            pessoa.Nome = Console.ReadLine();
 
-            Console.WriteLine("\tDigite seu nome de usuário");
-            string usuario = Console.ReadLine();
+            Console.WriteLine("Digite seu sobrenome:");
+            pessoa.Sobrenome = Console.ReadLine();
 
-            Console.WriteLine("\tDigite uma senha");
-            string senha = Console.ReadLine();
+            Console.WriteLine("Digite seu nome de usuário");
+            pessoa.Usuario = Console.ReadLine();
 
-            if (UsuarioRegistrado())
-            {
-                Console.WriteLine("Usuário existente.");
-                MostrarMenu();
-                return;
-            }
+            Console.WriteLine("Qual a sua função?");
+            pessoa.Funcao = Console.ReadLine();
+
+            Console.WriteLine("Digite uma senha");
+            pessoa.Senha = Console.ReadLine();
 
             //StreamWrite método para guardar dados do teclado na lista
 
-            using(StreamWriter sw = File.AppendText("Lista_Cadastro/arquivoUsuarioESenha.txt"))
+            using(StreamWriter sw = File.AppendText("Lista_Cadastro/DadosCadastrados.txt"))
             {
-                sw.WriteLine(UserNome + ";" + UserSobrenome + ";" + usuario + ";" + senha);
+                sw.WriteLine($"Nome: " + pessoa.Nome  + ";" + "Sobrenome: " + pessoa.Sobrenome  + ";" + "Usuario: " + pessoa.Usuario  + ";" + "Função:" + pessoa.Funcao + ";"+ "Senha:" + pessoa.Senha);
             }
-            Console.WriteLine("\nRegistro concluído com Sucesso! Faça login para acessar o sistema.");
-            MostrarMenu(); 
+            Console.WriteLine("Registro concluído com Sucesso! Faça login para acessar o sistema.\n");
+            MostrarMenu();
         }
 
+        bool usuarioExiste = UsuarioRegistrado("usuario", "senha");
+
         //Método para verificar se usuário está registrado
-        static bool UsuarioRegistrado()
+        static bool UsuarioRegistrado(string usuario, string senha)
         {
-            string[] linhas = File.ReadAllLines("Lista_Cadastro/arquivoUsuarioESenha.txt");
-            foreach(string var in linhas)
+            try 
             {
-                string[] divisor = var.Split(";");
-                if (divisor[0] == var)
+                string[] linhas = File.ReadAllLines("Lista_Cadastro/DadosCadastrados.txt");
+                foreach(string linha in linhas)
                 {
-                    return true;
-                }
-            } 
-            return false;
+                    string[] divisor = linha.Split(";");
+                    if (divisor[0] == usuario && divisor[0] == senha)
+                    {
 
-    }
-
+                        return true;
+                    }
+                } 
+                Console.WriteLine($"\nLogin bem-sucedido!, Bem-vindo {usuario}\n");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao verficar usuário\n {ex.Message}");
+                return false;
+            }
+        }
+        
         private string GetDebuggerDisplay()
         {
             return ToString();
